@@ -37,7 +37,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_SITES_KEY, JSON.stringify(sites))
+    safeSetLocalSites(sites)
   }, [sites])
 
   useEffect(() => {
@@ -545,6 +545,14 @@ function readLocalSites() {
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
+  }
+}
+
+function safeSetLocalSites(sites) {
+  try {
+    localStorage.setItem(LOCAL_SITES_KEY, JSON.stringify(sites))
+  } catch (error) {
+    console.warn('localStorage 写入失败，已忽略：', error)
   }
 }
 
