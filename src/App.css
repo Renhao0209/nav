@@ -191,11 +191,13 @@
 }
 
 .section-header h2 {
-  font-size: 32px;
-  line-height: 1;
-  color: #f43f5e;
+  font-size: 22px;
+  line-height: 1.2;
+  color: #e879f9;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  margin-top: -2px;
+  margin-top: 0;
+  text-align: center;
 }
 
 .section-header span {
@@ -247,24 +249,26 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
 }
 
 .site-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-bottom: 2px;
 }
 
 .site-name {
   max-width: 100%;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #fb7185;
+  color: #a21caf;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 0;
 }
 
 .site-select {
