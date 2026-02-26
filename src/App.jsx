@@ -323,7 +323,7 @@ function App() {
         window.open(site.url, '_blank', 'noopener,noreferrer')
       }}
     >
-      <div className="site-card-head">
+      <div className="site-card-content">
         <img
           className="site-icon"
           src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
@@ -333,13 +333,12 @@ function App() {
           }}
         />
 
-        <div className="site-title-wrap">
-          <h3 title={site.name}>{site.name}</h3>
-          <p>{site.category || '未分类'}</p>
-        </div>
+        <h3 className="site-name" title={site.name}>{site.name}</h3>
+        <p className="site-domain">{getHostname(site.url)}</p>
 
         {editMode && (
           <input
+            className="site-select"
             type="checkbox"
             checked={selectedSites.includes(site.id)}
             onClick={(event) => event.stopPropagation()}
@@ -347,16 +346,6 @@ function App() {
           />
         )}
       </div>
-
-      <a
-        href={site.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="site-url"
-        onClick={(event) => event.stopPropagation()}
-      >
-        {site.url}
-      </a>
     </article>
   )
 
@@ -558,6 +547,14 @@ function normalizeUrl(url) {
     return value
   }
   return `https://${value}`
+}
+
+function getHostname(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./i, '')
+  } catch {
+    return ''
+  }
 }
 
 export default App

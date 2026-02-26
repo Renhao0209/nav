@@ -193,18 +193,24 @@ body {
 
 .section-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 12px;
 }
 
 .site-card {
-  background: rgba(255, 255, 255, 0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 156px;
+  aspect-ratio: 1 / 1;
+  background: rgba(255, 255, 255, 0.46);
   border: 1px solid rgba(255, 255, 255, 0.66);
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 18px;
+  padding: 12px;
   box-shadow: 0 8px 18px rgba(80, 97, 143, 0.12);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -219,52 +225,49 @@ body {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
 }
 
-.site-card-head {
+.site-card-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  width: 100%;
 }
 
 .site-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px;
 }
 
-.site-title-wrap {
-  min-width: 0;
-  flex: 1;
-}
-
-.site-title-wrap h3 {
-  font-size: 15px;
+.site-name {
+  max-width: 100%;
+  font-size: 14px;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.site-title-wrap p {
+.site-domain {
+  max-width: 100%;
   font-size: 12px;
   color: var(--subtext);
-  margin-top: 3px;
-}
-
-.site-url {
-  display: block;
-  margin-top: 10px;
-  color: var(--primary);
-  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-decoration: none;
 }
 
-.site-url:hover {
-  text-decoration: underline;
+.site-select {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 16px;
+  height: 16px;
 }
 
 .empty-state {
