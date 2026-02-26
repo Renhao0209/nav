@@ -5,6 +5,7 @@ import ImportBookmarks from './components/ImportBookmarks'
 import EditSiteForm from './components/EditSiteForm'
 
 const ROOT_CATEGORIES = ['书签栏', '收藏夹栏', 'Bookmarks', 'Bookmarks bar']
+const GENSHIN_HEROINES = ['芙宁娜', '雷电将军', '神里绫华', '纳西妲', '甘雨', '妮露', '八重神子', '刻晴', '胡桃', '优菈', '夜兰', '申鹤', '宵宫', '琴', '莫娜']
 
 function App() {
   const [sites, setSites] = useState([])
@@ -107,6 +108,12 @@ function App() {
 
     return [...orderedGroups, ...remainingGroups]
   }, [activeCategory, categories, filteredSites])
+
+  const dailyHeroineName = useMemo(() => {
+    const now = new Date()
+    const daySeed = Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 86400000)
+    return GENSHIN_HEROINES[daySeed % GENSHIN_HEROINES.length]
+  }, [])
 
   const fetchSites = async (autoImportWhenEmpty = true) => {
     setLoading(true)
@@ -334,7 +341,6 @@ function App() {
         />
 
         <h3 className="site-name" title={site.name}>{site.name}</h3>
-        <p className="site-domain">{getHostname(site.url)}</p>
 
         {editMode && (
           <input
@@ -353,8 +359,8 @@ function App() {
     <div className="app-shell">
       <header className="hero">
         <div>
-          <h1>原神女角色名字导航</h1>
-          <p>以女角色主题风格打造的个人网址导航</p>
+          <h1>虎窝导航</h1>
+          <p>今日原神女角色：{dailyHeroineName}</p>
           <div className="hero-stats">
             <span>{sites.length} 个站点</span>
             <span>{categories.length - 2} 个分类</span>
@@ -547,14 +553,6 @@ function normalizeUrl(url) {
     return value
   }
   return `https://${value}`
-}
-
-function getHostname(url) {
-  try {
-    return new URL(url).hostname.replace(/^www\./i, '')
-  } catch {
-    return ''
-  }
 }
 
 export default App
