@@ -1,0 +1,47 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1920" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DCE9FF"/>
+      <stop offset="1" stop-color="#F4E7FF"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(340 250) rotate(32) scale(360 260)">
+      <stop stop-color="#9CC7FF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#9CC7FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(960 180) rotate(10) scale(420 260)">
+      <stop stop-color="#C8B0FF" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#C8B0FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1550 260) rotate(-14) scale(360 260)">
+      <stop stop-color="#FFB9D0" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#FFB9D0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#glow1)"/>
+  <rect width="1920" height="1080" fill="url(#glow2)"/>
+  <rect width="1920" height="1080" fill="url(#glow3)"/>
+
+  <g opacity="0.22" fill="#FFFFFF">
+    <circle cx="320" cy="760" r="120"/>
+    <circle cx="580" cy="780" r="90"/>
+    <circle cx="890" cy="760" r="120"/>
+    <circle cx="1210" cy="790" r="95"/>
+    <circle cx="1530" cy="760" r="118"/>
+  </g>
+
+  <g font-family="'Microsoft YaHei', 'PingFang SC', sans-serif" font-size="42" font-weight="700" fill="#304C7A" opacity="0.68">
+    <text x="230" y="760">芙宁娜</text>
+    <text x="500" y="790">雷电将军</text>
+    <text x="795" y="760">神里绫华</text>
+    <text x="1115" y="790">纳西妲</text>
+    <text x="1435" y="760">甘雨</text>
+  </g>
+
+  <g opacity="0.25" fill="#FFFFFF">
+    <path d="M210 610C265 505 380 460 500 490C620 520 700 620 680 720C660 820 550 880 430 865C310 850 230 780 210 610Z"/>
+    <path d="M760 590C810 500 925 460 1040 500C1155 540 1210 650 1175 740C1140 830 1030 870 915 840C800 810 735 720 760 590Z"/>
+    <path d="M1290 610C1340 510 1450 470 1565 500C1680 530 1745 635 1715 730C1685 825 1575 870 1460 845C1345 820 1265 725 1290 610Z"/>
+  </g>
+</svg>

@@ -353,8 +353,8 @@ function App() {
     <div className="app-shell">
       <header className="hero">
         <div>
-          <h1>虎窝导航</h1>
-          <p>美观、简洁、可编辑的个人导航中心</p>
+          <h1>原神女角色名字导航</h1>
+          <p>以女角色主题风格打造的个人网址导航</p>
           <div className="hero-stats">
             <span>{sites.length} 个站点</span>
             <span>{categories.length - 2} 个分类</span>
