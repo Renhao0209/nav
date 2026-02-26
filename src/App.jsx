@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+  useEffect(() => {
+    document.title = `${dailyHeroineName}导航`;
+  }, [dailyHeroineName]);
 import './App.css'
 import AddSiteForm from './components/AddSiteForm'
 import ImportBookmarks from './components/ImportBookmarks'
