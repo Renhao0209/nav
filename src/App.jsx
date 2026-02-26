@@ -359,7 +359,7 @@ function App() {
     <div className="app-shell">
       <header className="hero">
         <div>
-          <h1>虎窝导航</h1>
+          <h1>{dailyHeroineName}导航</h1>
           <p>今日原神女角色：{dailyHeroineName}</p>
           <div className="hero-stats">
             <span>{sites.length} 个站点</span>
