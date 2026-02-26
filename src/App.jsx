@@ -21,7 +21,7 @@ function App() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [sortMode, setSortMode] = useState('recent')
 
-  const [editMode, setEditMode] = useState(true)
+  const [editMode, setEditMode] = useState(false)
   const [newCategory, setNewCategory] = useState('')
   const [editingSite, setEditingSite] = useState(null)
 
