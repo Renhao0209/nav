@@ -1,14 +1,14 @@
+
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import AddSiteForm from './components/AddSiteForm'
 import ImportBookmarks from './components/ImportBookmarks'
 import EditSiteForm from './components/EditSiteForm'
 
-const ROOT_CATEGORIES = ['书签栏', '收藏夹栏', 'Bookmarks', 'Bookmarks bar']
-const GENSHIN_HEROINES = ['芙宁娜', '雷电将军', '神里绫华', '纳西妲', '甘雨', '妮露', '八重神子', '刻晴', '胡桃', '优菈', '夜兰', '申鹤', '宵宫', '琴', '莫娜']
-
 function App() {
-  // GENSHIN_HEROINES 和 dailyHeroineName 已在后面声明，无需重复
+
+  const ROOT_CATEGORIES = ['书签栏', '收藏夹栏', 'Bookmarks', 'Bookmarks bar']
+  const GENSHIN_HEROINES = ['芙宁娜', '雷电将军', '神里绫华', '纳西妲', '甘雨', '妮露', '八重神子', '刻晴', '胡桃', '优菈', '夜兰', '申鹤', '宵宫', '琴', '莫娜']
 
   useEffect(() => {
     document.title = `${dailyHeroineName}导航`;
