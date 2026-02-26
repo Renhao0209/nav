@@ -81,6 +81,33 @@ function App() {
     return list
   }, [activeCategory, searchKeyword, sites, sortMode])
 
+  const groupedSites = useMemo(() => {
+    const groupMap = new Map()
+
+    filteredSites.forEach((site) => {
+      const groupName = (site.category || '').trim() || '未分类'
+      if (!groupMap.has(groupName)) {
+        groupMap.set(groupName, [])
+      }
+      groupMap.get(groupName).push(site)
+    })
+
+    if (activeCategory !== '全部') {
+      return Array.from(groupMap.entries()).map(([name, items]) => ({ name, items }))
+    }
+
+    const categoryOrder = categories.filter((category) => category !== '全部')
+    const orderedGroups = categoryOrder
+      .filter((category) => groupMap.has(category))
+      .map((category) => ({ name: category, items: groupMap.get(category) }))
+
+    const remainingGroups = Array.from(groupMap.entries())
+      .filter(([name]) => !categoryOrder.includes(name))
+      .map(([name, items]) => ({ name, items }))
+
+    return [...orderedGroups, ...remainingGroups]
+  }, [activeCategory, categories, filteredSites])
+
   const fetchSites = async (autoImportWhenEmpty = true) => {
     setLoading(true)
     try {
@@ -284,6 +311,55 @@ function App() {
     setSelectedSites(filteredSites.map((site) => site.id))
   }
 
+  const renderSiteCard = (site) => (
+    <article
+      key={site.id}
+      className={`site-card ${selectedSites.includes(site.id) ? 'selected' : ''}`}
+      onClick={() => {
+        if (editMode) {
+          handleEditSite(site)
+          return
+        }
+        window.open(site.url, '_blank', 'noopener,noreferrer')
+      }}
+    >
+      <div className="site-card-head">
+        <img
+          className="site-icon"
+          src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
+          alt={`${site.name} favicon`}
+          onError={(event) => {
+            event.currentTarget.src = 'https://www.google.com/s2/favicons?domain=example.com&sz=64'
+          }}
+        />
+
+        <div className="site-title-wrap">
+          <h3 title={site.name}>{site.name}</h3>
+          <p>{site.category || '未分类'}</p>
+        </div>
+
+        {editMode && (
+          <input
+            type="checkbox"
+            checked={selectedSites.includes(site.id)}
+            onClick={(event) => event.stopPropagation()}
+            onChange={() => handleSiteSelect(site.id)}
+          />
+        )}
+      </div>
+
+      <a
+        href={site.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="site-url"
+        onClick={(event) => event.stopPropagation()}
+      >
+        {site.url}
+      </a>
+    </article>
+  )
+
   return (
     <div className="app-shell">
       <header className="hero">
@@ -354,53 +430,16 @@ function App() {
       )}
 
       <main className="site-grid">
-        {!loading && filteredSites.map((site) => (
-          <article
-            key={site.id}
-            className={`site-card ${selectedSites.includes(site.id) ? 'selected' : ''}`}
-            onClick={() => {
-              if (editMode) {
-                handleEditSite(site)
-                return
-              }
-              window.open(site.url, '_blank', 'noopener,noreferrer')
-            }}
-          >
-            <div className="site-card-head">
-              <img
-                className="site-icon"
-                src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.url)}&sz=64`}
-                alt={`${site.name} favicon`}
-                onError={(event) => {
-                  event.currentTarget.src = 'https://www.google.com/s2/favicons?domain=example.com&sz=64'
-                }}
-              />
-
-              <div className="site-title-wrap">
-                <h3 title={site.name}>{site.name}</h3>
-                <p>{site.category || '未分类'}</p>
-              </div>
-
-              {editMode && (
-                <input
-                  type="checkbox"
-                  checked={selectedSites.includes(site.id)}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={() => handleSiteSelect(site.id)}
-                />
-              )}
+        {!loading && groupedSites.map((group) => (
+          <section key={group.name} className="category-section">
+            <div className="section-header">
+              <h2>{group.name}</h2>
+              <span>{group.items.length} 个站点</span>
             </div>
-
-            <a
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="site-url"
-              onClick={(event) => event.stopPropagation()}
-            >
-              {site.url}
-            </a>
-          </article>
+            <div className="section-grid">
+              {group.items.map(renderSiteCard)}
+            </div>
+          </section>
         ))}
 
         {!loading && filteredSites.length === 0 && (

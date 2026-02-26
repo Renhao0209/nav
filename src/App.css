@@ -5,11 +5,11 @@
 }
 
 :root {
-  --bg: #f4f7fb;
-  --card: #ffffff;
+  --bg: #dfe7f5;
+  --card: rgba(255, 255, 255, 0.42);
   --text: #1f2937;
   --subtext: #64748b;
-  --line: #e2e8f0;
+  --line: rgba(255, 255, 255, 0.5);
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --success: #16a34a;
@@ -22,7 +22,11 @@
 body {
   font-family: Inter, 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at 10% 10%, #e8f1ff 0%, var(--bg) 50%) no-repeat;
+  background:
+    radial-gradient(circle at 8% 12%, #edf4ff 0%, transparent 34%),
+    radial-gradient(circle at 90% 18%, #ebf0ff 0%, transparent 30%),
+    linear-gradient(135deg, #d9e3f5 0%, #e7edf9 100%);
+  background-attachment: fixed;
 }
 
 .app-shell {
@@ -36,11 +40,13 @@ body {
   display: flex;
   gap: 18px;
   justify-content: space-between;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 80%);
+  background: rgba(255, 255, 255, 0.34);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 22px;
-  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px rgba(80, 97, 143, 0.16);
 }
 
 .hero h1 {
@@ -60,7 +66,7 @@ body {
 }
 
 .hero-stats span {
-  background: #eef2ff;
+  background: rgba(238, 242, 255, 0.72);
   color: #1e3a8a;
   border-radius: 999px;
   padding: 5px 10px;
@@ -79,8 +85,11 @@ body {
   margin-top: 16px;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 28px rgba(80, 97, 143, 0.1);
 }
 
 .search-row {
@@ -116,10 +125,10 @@ body {
 }
 
 .category-chip {
-  border: 1px solid #dbe2ea;
+  border: 1px solid rgba(165, 180, 208, 0.6);
   border-radius: 999px;
   padding: 7px 14px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.62);
   color: #334155;
   cursor: pointer;
   font-size: 13px;
@@ -138,35 +147,71 @@ body {
 
 .notice {
   margin-top: 14px;
-  background: #ecfeff;
-  border: 1px solid #a5f3fc;
+  background: rgba(236, 254, 255, 0.62);
+  border: 1px solid rgba(165, 243, 252, 0.75);
   color: #155e75;
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 14px;
   cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .site-grid {
   margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.category-section {
+  background: rgba(255, 255, 255, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 20px;
+  padding: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 14px 32px rgba(80, 97, 143, 0.12);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-header h2 {
+  font-size: 16px;
+}
+
+.section-header span {
+  font-size: 12px;
+  color: var(--subtext);
+}
+
+.section-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
 }
 
 .site-card {
-  background: var(--card);
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.66);
   border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 8px 18px rgba(80, 97, 143, 0.12);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .site-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 28px rgba(80, 97, 143, 0.18);
 }
 
 .site-card.selected {
@@ -226,9 +271,11 @@ body {
   grid-column: 1 / -1;
   text-align: center;
   padding: 50px 20px;
-  background: #fff;
-  border: 1px dashed #cbd5e1;
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px dashed rgba(148, 163, 184, 0.6);
   border-radius: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .empty-state p {
@@ -290,11 +337,13 @@ body {
 .modal-card {
   width: 100%;
   max-width: 420px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 14px;
   border: 1px solid var(--line);
   box-shadow: 0 20px 40px rgba(2, 6, 23, 0.25);
   padding: 18px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .modal-card.large {
