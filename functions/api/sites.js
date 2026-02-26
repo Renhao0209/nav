@@ -1,128 +1,179 @@
-// 处理站点相关的 API 请求
+const SITES_KEY = 'all_sites';
+const CATEGORIES_KEY = 'all_categories';
+
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
 
-  // GET 请求 - 获取所有站点
   if (method === 'GET') {
     try {
-      const sites = await env.NAV_SITES.get('all_sites');
-      return new Response(sites || '[]', {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const sites = await getSites(env);
+      const categories = await getCategories(env, sites);
+
+      if (url.searchParams.get('meta') === '1') {
+        return json({ sites, categories });
+      }
+
+      return json(sites);
     } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return json({ error: error.message }, 500);
     }
   }
 
-  // POST 请求 - 添加站点或分类
   if (method === 'POST') {
     try {
       const data = await request.json();
-      
-      // 如果是添加分类
+
       if (data.category && !data.name && !data.url) {
-        const sites = JSON.parse(await env.NAV_SITES.get('all_sites') || '[]');
-        // 分类已存在，直接返回站点列表
-        const categoryExists = sites.some(site => site.category === data.category);
-        if (!categoryExists) {
-          // 创建一个占位站点来存储分类
-          const placeholderSite = {
-            id: `category_${Date.now()}`,
-            name: `分类占位: ${data.category}`,
-            url: '#',
-            category: data.category,
-            createdAt: new Date().toISOString(),
-            isPlaceholder: true
-          };
-          sites.push(placeholderSite);
-          await env.NAV_SITES.put('all_sites', JSON.stringify(sites));
+        const categoryName = (data.category || '').trim();
+        if (!categoryName) {
+          return json({ error: '分类不能为空' }, 400);
         }
-        return new Response(JSON.stringify(sites), {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' }
-        });
+
+        const categories = await getCategories(env);
+        const nextCategories = categories.includes(categoryName)
+          ? categories
+          : [...categories, categoryName];
+
+        await env.NAV_SITES.put(CATEGORIES_KEY, JSON.stringify(nextCategories));
+        return json({ success: true, categories: nextCategories }, 201);
       }
-      
-      // 添加站点
-      const site = data;
-      const sites = JSON.parse(await env.NAV_SITES.get('all_sites') || '[]');
-      
-      // 生成唯一 ID
-      site.id = Date.now().toString();
-      // 添加时间戳
-      site.createdAt = new Date().toISOString();
-      
-      sites.push(site);
-      await env.NAV_SITES.put('all_sites', JSON.stringify(sites));
-      
-      return new Response(JSON.stringify(site), {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
-      });
+
+      const sites = await getSites(env);
+      const nextSite = normalizeSite(data);
+      const nextSites = [...sites, nextSite];
+      await env.NAV_SITES.put(SITES_KEY, JSON.stringify(nextSites));
+
+      if (nextSite.category) {
+        const categories = await getCategories(env, nextSites);
+        if (!categories.includes(nextSite.category)) {
+          categories.push(nextSite.category);
+          await env.NAV_SITES.put(CATEGORIES_KEY, JSON.stringify(categories));
+        }
+      }
+
+      return json(nextSite, 201);
     } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return json({ error: error.message }, 500);
     }
   }
 
-  // DELETE 请求 - 删除站点
   if (method === 'DELETE') {
     try {
       const { ids } = await request.json();
-      const sites = JSON.parse(await env.NAV_SITES.get('all_sites') || '[]');
-      
-      const filteredSites = sites.filter(site => !ids.includes(site.id));
-      await env.NAV_SITES.put('all_sites', JSON.stringify(filteredSites));
-      
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const targetIds = Array.isArray(ids) ? ids : [];
+      const sites = await getSites(env);
+      const nextSites = sites.filter((site) => !targetIds.includes(site.id));
+      await env.NAV_SITES.put(SITES_KEY, JSON.stringify(nextSites));
+
+      return json({ success: true, deleted: sites.length - nextSites.length });
     } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return json({ error: error.message }, 500);
     }
   }
 
-  // PUT 请求 - 更新站点
   if (method === 'PUT') {
     try {
       const updatedSite = await request.json();
-      const sites = JSON.parse(await env.NAV_SITES.get('all_sites') || '[]');
-      
-      const index = sites.findIndex(site => site.id === updatedSite.id);
-      if (index === -1) {
-        return new Response(JSON.stringify({ error: '站点不存在' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        });
+      const sites = await getSites(env);
+      const targetIndex = sites.findIndex((site) => site.id === updatedSite.id);
+
+      if (targetIndex < 0) {
+        return json({ error: '站点不存在' }, 404);
       }
-      
-      sites[index] = updatedSite;
-      await env.NAV_SITES.put('all_sites', JSON.stringify(sites));
-      
-      return new Response(JSON.stringify(sites), {
-        headers: { 'Content-Type': 'application/json' }
-      });
+
+      const nextSite = {
+        ...sites[targetIndex],
+        ...normalizeSite(updatedSite, true),
+        id: sites[targetIndex].id,
+        createdAt: sites[targetIndex].createdAt || new Date().toISOString()
+      };
+
+      const nextSites = [...sites];
+      nextSites[targetIndex] = nextSite;
+      await env.NAV_SITES.put(SITES_KEY, JSON.stringify(nextSites));
+
+      if (nextSite.category) {
+        const categories = await getCategories(env, nextSites);
+        if (!categories.includes(nextSite.category)) {
+          categories.push(nextSite.category);
+          await env.NAV_SITES.put(CATEGORIES_KEY, JSON.stringify(categories));
+        }
+      }
+
+      return json(nextSites);
     } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return json({ error: error.message }, 500);
     }
   }
 
-  // 不支持的请求方法
   return new Response('Method Not Allowed', {
     status: 405,
-    headers: { 'Allow': 'GET, POST, PUT, DELETE' }
+    headers: { Allow: 'GET, POST, PUT, DELETE' }
+  });
+}
+
+async function getSites(env) {
+  const raw = await env.NAV_SITES.get(SITES_KEY);
+  const sites = readJson(raw, []);
+  return sites.filter((site) => site && !site.isPlaceholder && site.url && site.url !== '#');
+}
+
+async function getCategories(env, sites = null) {
+  const persisted = readJson(await env.NAV_SITES.get(CATEGORIES_KEY), []);
+  const sourceSites = sites || (await getSites(env));
+  const fromSites = sourceSites
+    .map((site) => (site.category || '').trim())
+    .filter(Boolean);
+
+  return [...new Set([...persisted, ...fromSites])];
+}
+
+function normalizeSite(site, keepId = false) {
+  const payload = {
+    name: (site?.name || '').trim(),
+    url: normalizeUrl(site?.url || ''),
+    category: (site?.category || '').trim(),
+    createdAt: site?.createdAt || new Date().toISOString()
+  };
+
+  if (!payload.name || !payload.url) {
+    throw new Error('站点名称和 URL 不能为空');
+  }
+
+  if (!keepId) {
+    payload.id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  return payload;
+}
+
+function normalizeUrl(url) {
+  const value = url.trim();
+  if (!value) {
+    return value;
+  }
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+  return `https://${value}`;
+}
+
+function readJson(raw, fallback) {
+  if (!raw) {
+    return fallback;
+  }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function json(payload, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
   });
 }
