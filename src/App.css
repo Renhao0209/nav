@@ -193,7 +193,7 @@ body {
 
 .section-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -238,10 +238,7 @@ body {
 .site-icon {
   width: 52px;
   height: 52px;
-  border-radius: 14px;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  background: rgba(255, 255, 255, 0.95);
-  padding: 6px;
+  border-radius: 12px;
 }
 
 .site-name {
@@ -405,6 +402,12 @@ body {
   }
 
   .search-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .section-grid {
     grid-template-columns: 1fr;
   }
 }
