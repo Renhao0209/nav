@@ -10,8 +10,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        worker: resolve(__dirname, 'src/worker.js')
+        main: resolve(__dirname, 'index.html')
       },
       output: {
         format: 'es',
