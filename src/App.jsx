@@ -4,8 +4,6 @@ import AddSiteForm from './components/AddSiteForm'
 import ImportBookmarks from './components/ImportBookmarks'
 import EditSiteForm from './components/EditSiteForm'
 
-const DEFAULT_PASSWORD = 'admin123'
-const LOCAL_SITES_KEY = 'nav_sites'
 const ROOT_CATEGORIES = ['书签栏', '收藏夹栏', 'Bookmarks', 'Bookmarks bar']
 
 function App() {
@@ -15,7 +13,6 @@ function App() {
 
   const [showAddForm, setShowAddForm] = useState(false)
   const [showImportForm, setShowImportForm] = useState(false)
-  const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [showAddCategoryForm, setShowAddCategoryForm] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
 
@@ -23,9 +20,7 @@ function App() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [sortMode, setSortMode] = useState('recent')
 
-  const [editMode, setEditMode] = useState(false)
-  const [password, setPassword] = useState('')
-  const [passwordError, setPasswordError] = useState('')
+  const [editMode, setEditMode] = useState(true)
   const [newCategory, setNewCategory] = useState('')
   const [editingSite, setEditingSite] = useState(null)
 
@@ -35,10 +30,6 @@ function App() {
   useEffect(() => {
     fetchSites()
   }, [])
-
-  useEffect(() => {
-    safeSetLocalSites(sites)
-  }, [sites])
 
   useEffect(() => {
     setSelectedSites((prev) => prev.filter((id) => sites.some((site) => site.id === id)))
@@ -90,7 +81,7 @@ function App() {
     return list
   }, [activeCategory, searchKeyword, sites, sortMode])
 
-  const fetchSites = async () => {
+  const fetchSites = async (autoImportWhenEmpty = true) => {
     setLoading(true)
     try {
       const response = await fetch('/api/sites?meta=1')
@@ -99,19 +90,31 @@ function App() {
       }
 
       const data = await response.json()
+      let nextSites = []
+      let nextCategories = []
+
       if (Array.isArray(data)) {
-        setSites(cleanSites(data))
-        setPersistedCategories([])
+        nextSites = cleanSites(data)
+        nextCategories = []
       } else {
-        setSites(cleanSites(data.sites || []))
-        setPersistedCategories(Array.isArray(data.categories) ? data.categories : [])
+        nextSites = cleanSites(data.sites || [])
+        nextCategories = Array.isArray(data.categories) ? data.categories : []
+      }
+
+      setSites(nextSites)
+      setPersistedCategories(nextCategories)
+
+      if (nextSites.length === 0 && autoImportWhenEmpty) {
+        const imported = await importDefaultBookmarksToRemote()
+        if (imported !== null) {
+          await fetchSites(false)
+        }
       }
     } catch (error) {
       console.error(error)
-      const localSites = readLocalSites()
-      setSites(cleanSites(localSites))
+      setSites([])
       setPersistedCategories([])
-      setNotice('当前处于本地模式，数据已从浏览器缓存加载')
+      setNotice('线上数据请求失败，请检查 Cloudflare Pages 的 Functions 与 KV 绑定')
     } finally {
       setLoading(false)
     }
@@ -158,21 +161,6 @@ function App() {
     if (count > 0) {
       setNotice(`导入完成，新增 ${count} 条站点`)
     }
-  }
-
-  const handlePasswordSubmit = (event) => {
-    event.preventDefault()
-    const correctPassword = import.meta.env.VITE_PASSWORD || DEFAULT_PASSWORD
-
-    if (password === correctPassword) {
-      setEditMode(true)
-      setShowPasswordForm(false)
-      setPassword('')
-      setPasswordError('')
-      return
-    }
-
-    setPasswordError('密码错误，请重试')
   }
 
   const handleAddCategory = async (categoryName) => {
@@ -249,6 +237,13 @@ function App() {
   }
 
   const handleImportDefaultBookmarks = async () => {
+    const imported = await importDefaultBookmarksToRemote()
+    if (imported !== null) {
+      await fetchSites(false)
+    }
+  }
+
+  const importDefaultBookmarksToRemote = async () => {
     try {
       const fileResponse = await fetch('/default-bookmarks.html')
       if (!fileResponse.ok) {
@@ -267,11 +262,12 @@ function App() {
       }
 
       const result = await response.json()
-      await fetchSites()
       setNotice(`默认书签导入完成：新增 ${result.imported ?? 0} 条，跳过 ${result.skipped ?? 0} 条`)
+      return result.imported ?? 0
     } catch (error) {
       console.error(error)
       setNotice('默认书签导入失败，请检查 API 或手动导入文件')
+      return null
     }
   }
 
@@ -302,27 +298,25 @@ function App() {
         </div>
 
         <div className="toolbar-actions">
-          {editMode ? (
-            <>
-              <button className="btn btn-primary" onClick={() => setShowAddForm(true)}>添加站点</button>
-              <button className="btn btn-success" onClick={() => setShowImportForm(true)}>导入收藏夹</button>
-              <button className="btn btn-violet" onClick={handleImportDefaultBookmarks}>导入默认书签</button>
-              <button className="btn btn-secondary" onClick={() => setShowAddCategoryForm(true)}>添加分类</button>
-              <button className="btn btn-dark" onClick={() => setEditMode(false)}>退出编辑</button>
+          <>
+            <button className="btn btn-primary" onClick={() => setShowAddForm(true)}>添加站点</button>
+            <button className="btn btn-success" onClick={() => setShowImportForm(true)}>导入收藏夹</button>
+            <button className="btn btn-violet" onClick={handleImportDefaultBookmarks}>导入默认书签</button>
+            <button className="btn btn-secondary" onClick={() => setShowAddCategoryForm(true)}>添加分类</button>
+            <button className="btn btn-dark" onClick={() => setEditMode((prev) => !prev)}>
+              {editMode ? '切换浏览' : '切换编辑'}
+            </button>
 
-              {filteredSites.length > 0 && (
-                <button className="btn btn-secondary" onClick={toggleSelectAll}>
-                  {selectedSites.length === filteredSites.length ? '取消全选' : '全选'}
-                </button>
-              )}
+            {editMode && filteredSites.length > 0 && (
+              <button className="btn btn-secondary" onClick={toggleSelectAll}>
+                {selectedSites.length === filteredSites.length ? '取消全选' : '全选'}
+              </button>
+            )}
 
-              {selectedSites.length > 0 && (
-                <button className="btn btn-danger" onClick={handleBatchDelete}>删除选中 ({selectedSites.length})</button>
-              )}
-            </>
-          ) : (
-            <button className="btn btn-warning" onClick={() => setShowPasswordForm(true)}>进入编辑</button>
-          )}
+            {editMode && selectedSites.length > 0 && (
+              <button className="btn btn-danger" onClick={handleBatchDelete}>删除选中 ({selectedSites.length})</button>
+            )}
+          </>
         </div>
       </header>
 
@@ -438,40 +432,6 @@ function App() {
         />
       )}
 
-      {showPasswordForm && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <h2>请输入密码进入编辑模式</h2>
-            <form onSubmit={handlePasswordSubmit} className="modal-form">
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="输入编辑密码"
-                required
-              />
-
-              {passwordError && <p className="error-text">{passwordError}</p>}
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setShowPasswordForm(false)
-                    setPassword('')
-                    setPasswordError('')
-                  }}
-                >
-                  取消
-                </button>
-                <button type="submit" className="btn btn-primary">确认</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {showAddCategoryForm && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -537,23 +497,6 @@ function App() {
       )}
     </div>
   )
-}
-
-function readLocalSites() {
-  try {
-    const raw = localStorage.getItem(LOCAL_SITES_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function safeSetLocalSites(sites) {
-  try {
-    localStorage.setItem(LOCAL_SITES_KEY, JSON.stringify(sites))
-  } catch (error) {
-    console.warn('localStorage 写入失败，已忽略：', error)
-  }
 }
 
 function cleanSites(rawSites) {
